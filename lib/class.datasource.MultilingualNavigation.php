@@ -21,6 +21,21 @@
 					'handle' => $page['plh_h-'.$lang_code],
 				)
 			));
+			
+			//Ouput all other language also
+			foreach( FLang::getLangs() as $lc ){
+				//skip the current one already outputed (line 16)
+				if($lang_code != $lc) {
+					$oPage->appendChild(new XMLElement(
+						'item',
+						General::sanitize($page['plh_t-'.$lc]),
+						array(
+							'lang' => $lc,
+							'handle' => $page['plh_h-'.$lc],
+						)
+					));
+				}
+			}
 
 			if(in_array($page['id'], array_keys($page_types))) {
 				$xTypes = new XMLElement('types');
