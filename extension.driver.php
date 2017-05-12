@@ -251,9 +251,9 @@
 			/*  Tabs  */
 			/*------------------------------------------------------------------------------------------------*/
 
-			$ul = new XMLElement('ul', null, array('class' => 'tabs'));
+			$ul = new XMLElement('ul', null, array('class' => 'tabs inverted-margin'));
 			foreach( $langs as $lc ){
-				$li = new XMLElement('li', $all_langs[$lc], array('class' => $lc));
+				$li = new XMLElement('li', $lc, array('class' => $lc));
 				$lc === $main_lang ? $ul->prependChild($li) : $ul->appendChild($li);
 			}
 
