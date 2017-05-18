@@ -260,9 +260,9 @@ class Extension_page_lhandles extends Extension
         /*  Tabs  */
         /*------------------------------------------------------------------------------------------------*/
 
-        $ul = new XMLElement('ul', null, array('class' => 'tabs'));
+        $ul = new XMLElement('ul', null, array('class' => 'tabs inverted-margin'));
         foreach ($langs as $lc) {
-            $li = new XMLElement('li', $all_langs[$lc], array('class' => $lc));
+            $li = new XMLElement('li', $lc, array('class' => $lc));
             $lc === $main_lang ? $ul->prependChild($li) : $ul->appendChild($li);
         }
 
@@ -379,7 +379,7 @@ class Extension_page_lhandles extends Extension
     private function appendConsolidate(XMLElement &$wrapper)
     {
         $label = Widget::Label(__('Consolidate entry data'));
-        $label->appendChild(Widget::Input('settings['.PLH_GROUP.'][consolidate]', 'yes', 'checkbox', array('checked' => 'checked')));
+        $label->prependChild(Widget::Input('settings['.PLH_GROUP.'][consolidate]', 'yes', 'checkbox', array('checked' => 'checked')));
         $wrapper->appendChild($label);
         $wrapper->appendChild(new XMLElement('p', __('Check this field if you want to consolidate database by <b>keeping</b> entry values of removed/old Language Driver language codes. Entry values of current language codes will not be affected.'), array('class' => 'help')));
     }
