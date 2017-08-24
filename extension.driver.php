@@ -513,8 +513,8 @@ class Extension_page_lhandles extends Extension
             // If column lang_code dosen't exist in the laguange add columns
 
             if (!in_array('plh_t-'.$lc, $columns)) {
-                $this->query(sprintf('ALTER TABLE `%1$s` ADD COLUMN `plh_t-%2$s` varchar(255) default NULL;', self::DB_TABLE, $lc));
-                $this->query(sprintf('ALTER TABLE `%1$s` ADD COLUMN `plh_h-%2$s` varchar(255) default NULL;', self::DB_TABLE, $lc));
+                $this->query(sprintf('ALTER TABLE `%1$s` ADD COLUMN `plh_t-%2$s` VARCHAR(255) DEFAULT NULL;', self::DB_TABLE, $lc));
+                $this->query(sprintf('ALTER TABLE `%1$s` ADD COLUMN `plh_h-%2$s` VARCHAR(255) DEFAULT NULL;', self::DB_TABLE, $lc));
             }
         }
     }
