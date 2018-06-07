@@ -606,7 +606,7 @@ class Extension_page_lhandles extends Extension
     {
         $fl_status = ExtensionManager::fetchStatus(array('handle' => 'frontend_localisation'));
 
-        return (boolean) ($fl_status[0] === EXTENSION_ENABLED);
+        return (boolean) ($fl_status[0] === Extension::EXTENSION_ENABLED);
     }
 
 }
