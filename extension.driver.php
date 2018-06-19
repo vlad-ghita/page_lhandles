@@ -225,7 +225,7 @@ class Extension_page_lhandles extends Extension
        ) {
             $this->first_pass = false;
 
-            $url = MySQL::cleanValue($context['page']);
+            $url = $context['page'];
 
             $context['page'] = PLHManagerURL::lang2sym($url, Flang::getLangCode());
         }
