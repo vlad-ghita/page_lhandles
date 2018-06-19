@@ -39,7 +39,10 @@ class datasourceplh_page extends Datasource
         }
 
         $pages = array();
-        foreach (PageManager::fetch(null, $fields) as $page) {
+        foreach ((new PageManager)
+            ->select($fields)
+            ->execute()
+            ->rows() as $page) {
             $pages[$page['id']] = $page;
         }
 
