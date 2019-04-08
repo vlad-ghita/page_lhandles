@@ -22,7 +22,7 @@ class MultilingualNavigationDatasource extends NavigationDatasource
                 'handle' => $page['plh_h-'.$lang_code],
             )
         ));
-        
+
         // add others
         foreach( FLang::getLangs() as $lc ){
             if($lang_code != $lc) {
@@ -46,7 +46,13 @@ class MultilingualNavigationDatasource extends NavigationDatasource
         }
 
         if($page['children'] != '0') {
-            if($children = PageManager::fetch(false, array($qf.'id, handle, title'), array(sprintf('`parent` = %d', $page['id'])))) {
+            if(
+                $children = (new PageManager)
+                    ->select(array($qf.'id, handle, title'))
+                    ->where(['parent' => $page['id']])
+                    ->execute()
+                    ->rows()
+            ) {
                 foreach($children as $c) $oPage->appendChild($this->buildMultilingualPageXML($c, $page_types, $qf));
             }
         }

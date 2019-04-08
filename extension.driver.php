@@ -8,8 +8,8 @@ require_once(EXTENSIONS.'/page_lhandles/lib/class.PLHManagerURL.php');
 require_once(EXTENSIONS.'/frontend_localisation/extension.driver.php');
 require_once(EXTENSIONS.'/frontend_localisation/lib/class.FLang.php');
 
-define_safe(PLH_NAME, 'Page LHandles');
-define_safe(PLH_GROUP, 'page_lhandles');
+define_safe('PLH_NAME', 'Page LHandles');
+define_safe('PLH_GROUP', 'page_lhandles');
 
 class Extension_page_lhandles extends Extension
 {
@@ -225,7 +225,7 @@ class Extension_page_lhandles extends Extension
        ) {
             $this->first_pass = false;
 
-            $url = MySQL::cleanValue($context['page']);
+            $url = $context['page'];
 
             $context['page'] = PLHManagerURL::lang2sym($url, Flang::getLangCode());
         }
@@ -260,9 +260,9 @@ class Extension_page_lhandles extends Extension
         /*  Tabs  */
         /*------------------------------------------------------------------------------------------------*/
 
-        $ul = new XMLElement('ul', null, array('class' => 'tabs'));
+        $ul = new XMLElement('ul', null, array('class' => 'tabs inverted-margin'));
         foreach ($langs as $lc) {
-            $li = new XMLElement('li', $all_langs[$lc], array('class' => $lc));
+            $li = new XMLElement('li', $lc, array('class' => $lc));
             $lc === $main_lang ? $ul->prependChild($li) : $ul->appendChild($li);
         }
 
@@ -379,7 +379,7 @@ class Extension_page_lhandles extends Extension
     private function appendConsolidate(XMLElement &$wrapper)
     {
         $label = Widget::Label(__('Consolidate entry data'));
-        $label->appendChild(Widget::Input('settings['.PLH_GROUP.'][consolidate]', 'yes', 'checkbox', array('checked' => 'checked')));
+        $label->prependChild(Widget::Input('settings['.PLH_GROUP.'][consolidate]', 'yes', 'checkbox', array('checked' => 'checked')));
         $wrapper->appendChild($label);
         $wrapper->appendChild(new XMLElement('p', __('Check this field if you want to consolidate database by <b>keeping</b> entry values of removed/old Language Driver language codes. Entry values of current language codes will not be affected.'), array('class' => 'help')));
     }
@@ -513,8 +513,8 @@ class Extension_page_lhandles extends Extension
             // If column lang_code dosen't exist in the laguange add columns
 
             if (!in_array('plh_t-'.$lc, $columns)) {
-                $this->query(sprintf('ALTER TABLE `%1$s` ADD COLUMN `plh_t-%2$s` varchar(255) default NULL;', self::DB_TABLE, $lc));
-                $this->query(sprintf('ALTER TABLE `%1$s` ADD COLUMN `plh_h-%2$s` varchar(255) default NULL;', self::DB_TABLE, $lc));
+                $this->query(sprintf('ALTER TABLE `%1$s` ADD COLUMN `plh_t-%2$s` VARCHAR(255) DEFAULT NULL;', self::DB_TABLE, $lc));
+                $this->query(sprintf('ALTER TABLE `%1$s` ADD COLUMN `plh_h-%2$s` VARCHAR(255) DEFAULT NULL;', self::DB_TABLE, $lc));
             }
         }
     }
@@ -606,7 +606,7 @@ class Extension_page_lhandles extends Extension
     {
         $fl_status = ExtensionManager::fetchStatus(array('handle' => 'frontend_localisation'));
 
-        return (boolean) ($fl_status[0] === EXTENSION_ENABLED);
+        return (boolean) ($fl_status[0] === Extension::EXTENSION_ENABLED);
     }
 
 }
