@@ -48,12 +48,15 @@ class MultilingualNavigationDatasource extends NavigationDatasource
         if($page['children'] != '0') {
             if(
                 $children = (new PageManager)
-                    ->select(array($qf.'id, handle, title'))
+                    ->select(['id', 'handle', 'title'])
+                    ->projection($qf)
                     ->where(['parent' => $page['id']])
                     ->execute()
                     ->rows()
             ) {
-                foreach($children as $c) $oPage->appendChild($this->buildMultilingualPageXML($c, $page_types, $qf));
+                foreach ($children as $c) {
+                    $oPage->appendChild($this->buildMultilingualPageXML($c, $page_types, $qf));
+                }
             }
         }
 
@@ -63,47 +66,44 @@ class MultilingualNavigationDatasource extends NavigationDatasource
     public function execute(array &$param_pool = null)
     {
         $result = new XMLElement($this->dsParamROOTELEMENT);
-        $type_sql = $parent_sql = null;
+        $stm = Symphony::Database()
+            ->select(['p.id', 'p.title', 'p.handle', 'p.sortorder'])
+            ->distinct()
+            ->from('tbl_pages', 'p')
+            ->orderBy('p.sortorder', 'ASC');
+        $stm->projection([
+            'children' => $stm
+                ->select(['COUNT(id)'])
+                ->from('tbl_pages')
+                ->where(['parent' => '$p.id'])
+        ]);
+        $stm->leftJoin('tbl_pages_types', 'pt')
+            ->on(['p.id' => '$pt.page_id']);
 
-        if(trim($this->dsParamFILTERS['type']) != '') {
-            $type_sql = $this->__processNavigationTypeFilter($this->dsParamFILTERS['type'], $this->__determineFilterType($this->dsParamFILTERS['type']));
+        if (trim($this->dsParamFILTERS['type']) != '') {
+            $this->processNavigationTypeFilter($this->dsParamFILTERS['type'], $stm);
+         }
+
+        if (trim($this->dsParamFILTERS['parent']) != '') {
+            $this->processNavigationParentFilter($this->dsParamFILTERS['parent'], $stm);
+        } else {
+            $stm->where(['parent' => null]);
+         }
+
+        $qf = [];
+
+        foreach (FLang::getLangs() as $lc) {
+            $qf = array_merge($qf, ["plh_t-{$lc}", "plh_h-{$lc}"]);
         }
+        $stm->projection($qf);
 
-        if(trim($this->dsParamFILTERS['parent']) != '') {
-            $parent_sql = $this->__processNavigationParentFilter($this->dsParamFILTERS['parent']);
-        }
+        $pages = $stm->execute()->rows();
 
-        $query_fields = "";
-        $qf = "";
-
-        foreach( FLang::getLangs() as $lc ){
-            $qf .= "`plh_t-{$lc}`,";
-            $qf .= "`plh_h-{$lc}`,";
-        }
-
-        // Build the Query appending the Parent and/or Type WHERE clauses
-        $query = sprintf("
-                SELECT DISTINCT {$qf}p.id, p.title, p.handle,  p.sortorder, (SELECT COUNT(id) FROM `tbl_pages` WHERE parent = p.id) AS children
-                FROM `tbl_pages` AS p
-                LEFT JOIN `tbl_pages_types` AS pt ON (p.id = pt.page_id)
-                WHERE 1 = 1
-                %s
-                %s
-                ORDER BY p.`sortorder` ASC
-            ",
-            // Add Parent SQL
-            !is_null($parent_sql) ? $parent_sql : " AND p.parent IS NULL ",
-            // Add Types SQL
-            !is_null($type_sql) ? $type_sql : ""
-        );
-
-        $pages = Symphony::Database()->fetch($query);
-
-        if((!is_array($pages) || empty($pages))){
-            if($this->dsParamREDIRECTONEMPTY == 'yes'){
+        if (empty($pages)) {
+            if ($this->dsParamREDIRECTONEMPTY == 'yes') {
                 throw new FrontendPageNotFoundException;
             }
-            $result->appendChild($this->__noRecordsFound());
+            $result->appendChild($this->noRecordsFound());
         } else {
             // Build an array of all the types so that the page's don't have to do
             // individual lookups.
